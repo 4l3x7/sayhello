@@ -10,16 +10,13 @@ import sys
 
 from sayhello import app
 
-# SQLite URI compatible
-WIN = sys.platform.startswith('win')
-if WIN:
-    prefix = 'sqlite:///'
-else:
-    prefix = 'sqlite:////'
-
-
-dev_db = prefix + os.path.join(os.path.dirname(app.root_path), 'data.db')
-
 SECRET_KEY = os.getenv('SECRET_KEY', 'secret string')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', dev_db)
+if os.getenv('FLASK_ENV') == "production":
+    SQLALCHEMY_DATABASE_URI =  'mysql+pymysql://'+os.getenv('DDBB_USER')+':'+os.getenv('DDBB_PWD')+'@'+os.getenv('DDBB_ENDPOINT')+'/'+os.getenv('DDBB_NAME')
+
+else:
+    dev_db = 'sqlite:///' + os.path.join(os.path.dirname(app.root_path), 'data.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(os.path.dirname(app.root_path), 'data.db')
+
+
