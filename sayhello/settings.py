@@ -6,7 +6,7 @@
     :license: MIT, see LICENSE for more details.
 """
 import os
-import sys
+#import sys
 
 from sayhello import app
 

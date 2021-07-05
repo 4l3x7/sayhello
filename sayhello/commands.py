@@ -37,7 +37,7 @@ def forge(count):
 
     for i in range(count):
         message = Message(
-            name=fake.name(),
+            name=fake.name() + i,
             body=fake.sentence(),
             timestamp=fake.date_time_this_year()
         )
