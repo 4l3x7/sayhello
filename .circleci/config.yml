@@ -6,23 +6,13 @@ version: 2
 orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
 jobs:
-  build:
+  lint-and-test:
     docker:
       # Use the same Docker base as the project
       - image: python:3.7.3-stretch
-
     working_directory: ~/repo
-
     steps:
       - checkout
-
-      # Download and cache dependencies
-      #- restore_cache:
-      #    keys:
-      #      - v1-dependencies-{{ checksum "requirements.txt" }}
-      #      # fallback to using the latest cache if no exact match is found
-      #      - v1-dependencies-
-              
       - run:
           name: install dependencies
           command: |
@@ -32,10 +22,6 @@ jobs:
             # Install hadolint
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
             chmod +x /bin/hadolint
-      #- save_cache:
-      #    paths:
-      #      - ./venv
-      #    key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       # run lint!
       - run:
@@ -44,6 +30,12 @@ jobs:
             source ~/.sayhello/bin/activate
             make lint 
 
+  build-image:
+    docker:
+      # Use the same Docker base as the project
+      - image: python:3.7.3-stretch
+    working_directory: ~/repo
+    steps:
       - aws-ecr/build-and-push-image:
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
@@ -51,7 +43,14 @@ jobs:
           create-repo: true
           dockerfile: Dockerfile
           path: .
-          region: AWS_REGION
+          region: AWS_DEFAULT_REGION
           repo: public.ecr.aws/v0u2j1d8/flask
           tag: "$CIRCLE_SHA1"
+
+workflows:
+  dev-flow:
+    jobs:
+      - lint-and-test
+      - build-image
+          requires: [lint-and-test]
   
