@@ -2,57 +2,13 @@
 #
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
-version: 2.1
 orbs:
-    aws-ecr: circleci/aws-ecr@7.0.0
-jobs:
-  lint-and-test:
-    docker:
-      # Use the same Docker base as the project
-      - image: python:3.7.3-stretch
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - run:
-          name: install dependencies
-          command: |
-            make setup
-            source ~/.sayhello/bin/activate
-            make install
-            # Install hadolint
-            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
-            chmod +x /bin/hadolint
-
-      # run lint!
-      - run:
-          name: run lint
-          command: |
-            source ~/.sayhello/bin/activate
-            make lint 
-  
-  #build-image:
-  #  docker:
-  #    - image: python:3.7.3-stretch
-  #  working_directory: ~/repo
-  #  steps:
-  #    - aws-ecr/build-and-push-image:
-  #        account-url: AWS_ECR_ACCOUNT_URL
-  #        aws-access-key-id: AWS_ACCESS_KEY_ID
-  #        aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-  #        create-repo: true
-  #       dockerfile: Dockerfile
-  #        path: .
-  #        region: AWS_DEFAULT_REGION
-  #       repo: public.ecr.aws/v0u2j1d8/flask
-  #        tag: "$CIRCLE_SHA1"
- 
-
+  aws-ecr: circleci/aws-ecr@x.y.z
+version: 2.1
 workflows:
-  dev-flow:
+  build_and_push_image:
     jobs:
-      - lint-and-test
       - aws-ecr/build-and-push-image:
-          requires: [lint-and-test]
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: WS_SECRET_ACCESS_KEY
@@ -63,4 +19,3 @@ workflows:
           region: AWS_DEFAULT_REGION
           repo: public.ecr.aws/v0u2j1d8/flask
           tag: "$CIRCLE_SHA1"
-  
