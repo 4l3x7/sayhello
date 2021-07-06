@@ -31,9 +31,9 @@ jobs:
             make lint 
 
   build-image:
-    docker:
-      - image: amazon/aws-cli
-    working_directory: ~/repo
+    #docker:
+    #  - image: amazon/aws-cli
+    #working_directory: ~/repo
     steps:
       - aws-ecr/build-and-push-image:
           account-url: AWS_ECR_ACCOUNT_URL
