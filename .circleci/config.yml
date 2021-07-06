@@ -51,6 +51,6 @@ workflows:
   dev-flow:
     jobs:
       - lint-and-test
-      - build-image
+      - build-image:
           requires: [lint-and-test]
   
