@@ -41,6 +41,7 @@ jobs:
           command: |
             docker build -t flask-app . 
             docker run -d --name flasky flask-app
+            sleep 30
             docker exec flasky curl --retry 10 --retry-connrefused http://localhost:5000 | grep "Say Hello"
   deploy-application:
     executor: aws-eks/python3
