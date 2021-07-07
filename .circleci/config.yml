@@ -141,5 +141,8 @@ workflows:
             - aws-ecr/build_and_push_image
           #  - aws-eks/create-cluster
       - test-application:
+          name: test-application
+          cluster-name: alex-cluster
+          aws-region: $AWS_DEFAULT_REGION
           requires:
             - deploy-application
