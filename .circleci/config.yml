@@ -46,4 +46,4 @@ workflows:
           cluster-name: eks-orb-demo-app-deployment
           aws-region: $AWS_DEFAULT_REGION
           requires:
-            - build-and-push-image
+            - aws-ecr/build_and_push_image
