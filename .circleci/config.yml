@@ -140,6 +140,6 @@ workflows:
           requires:
             - aws-ecr/build_and_push_image
           #  - aws-eks/create-cluster
-      - test-application
+      - test-application:
           requires:
             - deploy-application
