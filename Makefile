@@ -16,9 +16,8 @@ install:
 	chmod +x ./hadolint
 
 test:
-	# Additional, optional, tests could go here
-	#python -m pytest -vv --cov=myrepolib tests/*.py
-	#python -m pytest --nbval notebook.ipynb
+	flask run
+	curl -s --retry 10 "http://localhost:5000" | grep "Say Hello"
 
 lint:
 	# See local hadolint install instructions:   https://github.com/hadolint/hadolint
