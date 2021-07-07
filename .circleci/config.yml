@@ -32,7 +32,7 @@ workflows:
     jobs:
       - lint-and-test
       - aws-ecr/build_and_push_image:
-          #requires: [lint-and-test]
+          requires: [lint-and-test]
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
@@ -42,8 +42,3 @@ workflows:
           region: AWS_DEFAULT_REGION
           repo: public.ecr.aws/v0u2j1d8/flask
           tag: "$CIRCLE_SHA1"
-      - aws-eks/create-cluster:
-          cluster-name: eks-orb-demo-app-deployment
-          aws-region: $AWS_DEFAULT_REGION
-          #requires:
-          #  - aws-ecr/build_and_push_image
