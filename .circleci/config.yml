@@ -1,21 +1,86 @@
-# Python CircleCI 2.0 configuration file
-# Hola
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-#
-orbs:
-  aws-ecr: circleci/aws-ecr@x.y.z
 version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@1.4.0
+  
+jobs:
+  lint-and-test:
+    docker:
+      # Use the same Docker base as the project
+      - image: python:3.7.3-stretch
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+            make setup
+            source ~/.sayhello/bin/activate
+            make install
+            # Install hadolint
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+            chmod +x /bin/hadolint
+
+      # run lint!
+      - run:
+          name: run lint
+          command: |
+            source ~/.sayhello/bin/activate
+            make lint 
+
+  deploy-cfn:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y python3-pip python-dev
+      - run: sudo pip install --upgrade awscli
+      - run: aws --version
+      - run: 
+          name: install kubctl
+          command: |
+            curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.20.4/2021-04-12/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+            kubectl version --short --client
+      - run:
+          name: install eksctl
+          command: |
+             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+             sudo mv /tmp/eksctl /usr/local/bin
+             kubectl version --short --client
+      - run:
+          name: login
+          command: |
+             aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/v0u2j1d8
+      - setup_remote_docker
+      - run:
+          name: Push image to repo  
+          command: |
+              docker build -t flask .
+              docker tag flask:latest public.ecr.aws/v0u2j1d8/flask:latest
+              docker push public.ecr.aws/v0u2j1d8/flask:latest
+      - run: 
+          name: Deploy
+          command: |
+              aws eks --region us-west-2 update-kubeconfig --name flask-cluster
+              kubectl apply -f deploy.yml
+              kubectl get deployments
+      - run: 
+          name: Services
+          command: |
+              kubectl apply -f service_update.yaml
+              kubectl get services
+              kubectl get nodes -o wide
+            
+       
 workflows:
-  build_and_push_image:
+  deployment:
     jobs:
-      - aws-ecr/build-and-push-image:
-          account-url: AWS_ECR_ACCOUNT_URL
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: WS_SECRET_ACCESS_KEY
-          create-repo: true
-          dockerfile: Dockerfile
-          no-output-timeout: 20m
-          path: .
-          region: AWS_DEFAULT_REGION
-          repo: public.ecr.aws/v0u2j1d8/flask
-          tag: "$CIRCLE_SHA1"
+      - build
+      - lint-and-test:
+          requires:
+            - build
+          context:
+            - AWS
