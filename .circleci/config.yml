@@ -60,6 +60,10 @@ jobs:
                sed "s|DOCKER_IMAGE_NAME|<< parameters.docker-image-name >>|\
                 g;s|BUILD_DATE_VALUE|$BUILD_DATE|g;s|VERSION_INFO_VALUE|\
                 << parameters.version-info >>|g" > deployment/demo-app-deployment.yaml
+      - run:
+          name: See deployment manifest
+          command: |
+            cat deployment/demo-app-deployment.yaml
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
@@ -74,8 +78,8 @@ workflows:
   deploy-pipeline:
     jobs:
       - lint-and-test
-      - aws-eks/create-cluster:
-          cluster-name: alex-cluster
+      #- aws-eks/create-cluster:
+      #    cluster-name: alex-cluster
       - aws-ecr/build_and_push_image:
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
@@ -95,4 +99,4 @@ workflows:
           version-info: "${CIRCLE_SHA1}"
           requires:
             - aws-ecr/build_and_push_image
-            - aws-eks/create-cluster
+          #  - aws-eks/create-cluster

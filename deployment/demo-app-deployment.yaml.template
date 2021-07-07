@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demoapp
+  name: flask-app
   labels:
     app: demo
 spec:
@@ -27,4 +27,4 @@ spec:
         - name: BUILD_DATE
           value: "BUILD_DATE_VALUE"
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
