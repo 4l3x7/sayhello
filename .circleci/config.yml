@@ -74,6 +74,8 @@ workflows:
   deploy-pipeline:
     jobs:
       - lint-and-test
+      - aws-eks/create-cluster:
+          cluster-name: alex-cluster
       - aws-ecr/build_and_push_image:
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
@@ -87,9 +89,10 @@ workflows:
           requires: 
             - lint-and-test
       - deploy-application:
-          cluster-name: flask-cluster
+          cluster-name: alex-cluster
           aws-region: $AWS_DEFAULT_REGION
           docker-image-name: "${AWS_ECR_ACCOUNT_URL}/flask-udacity:${CIRCLE_SHA1}"
           version-info: "${CIRCLE_SHA1}"
           requires:
             - aws-ecr/build_and_push_image
+            - aws-eks/create-cluster
