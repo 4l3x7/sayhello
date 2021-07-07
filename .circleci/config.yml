@@ -27,6 +27,7 @@ jobs:
           command: |
             source ~/.sayhello/bin/activate
             make lint 
+
 workflows:
   deploy-pipeline:
     jobs:
@@ -42,10 +43,10 @@ workflows:
           region: AWS_DEFAULT_REGION
           repo: public.ecr.aws/v0u2j1d8/flask
           tag: "$CIRCLE_SHA1"
-      - deploy-application:
-          cluster-name: eks-orb-demo-app-deployment
-          aws-region: $AWS_DEFAULT_REGION
-          docker-image-name: "${AWS_ECR_ACCOUNT_URL}/flask:${CIRCLE_SHA1}"
-          version-info: "${CIRCLE_SHA1}"
-          requires:
-            - aws-eks/create-cluster
+      #- deploy-application:
+      #    cluster-name: eks-orb-demo-app-deployment
+      #    aws-region: $AWS_DEFAULT_REGION
+      #    docker-image-name: "${AWS_ECR_ACCOUNT_URL}/flask:${CIRCLE_SHA1}"
+      #    version-info: "${CIRCLE_SHA1}"
+      #    requires:
+      #      - aws-eks/create-cluster
