@@ -149,8 +149,8 @@ workflows:
     jobs:
       - lint
       - test:
-       requires: 
-          - lint
+          requires: 
+              - lint
       - aws-eks/create-cluster:
           cluster-name: alex-cluster
       - aws-ecr/build_and_push_image:
