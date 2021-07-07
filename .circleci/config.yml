@@ -27,27 +27,7 @@ jobs:
           command: |
             source ~/.sayhello/bin/activate
             make lint 
-      - setup_remote_docker
-      - run:
-          name: Install Docker client
-          command: |
-            apt-get update -y
-            apt-get upgrade -y
-            apt-get install -y \
-            apt-transport-https \
-            ca-certificates \
-            curl \
-            gnupg \
-            lsb-release
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-            apt-get update -y
-            apt-get install docker-ce docker-ce-cli containerd.io -y
-      - run:
-          name: Test App
-          command: |
-            docker build -t flask-app . 
-            docker run -d --name flasky flask-app
-            docker exec flasky curl --retry 10 --retry-connrefused http://localhost:5000 | grep "Say Hello"
+      
   test:
     docker:
       # Use the same Docker base as the project
