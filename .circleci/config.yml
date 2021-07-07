@@ -22,18 +22,16 @@ jobs:
             # Install hadolint
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
             chmod +x /bin/hadolint
-
-      # run lint!
       - run:
           name: run lint
           command: |
             source ~/.sayhello/bin/activate
             make lint 
 workflows:
-  deployment:
+  deploy-pipeline:
     jobs:
-      - lint-and-test
-      - aws-ecr/build-and-push-image:
+#      - lint-and-test
+      - aws-ecr/build_and_push_image:
           requires: [lint-and-test]
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
