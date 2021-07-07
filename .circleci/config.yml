@@ -27,11 +27,13 @@ jobs:
           command: |
             source ~/.sayhello/bin/activate
             make lint 
+      - setup_remote_docker
       - run:
           name: Test App
           command: |
-            source ~/.sayhello/bin/activate
-            make test 
+            docker build -t flask-app . 
+            docker run -d --name flasky flask-app
+            docker exec flasky curl --retry 10 --retry-connrefused http://localhost:5000 | grep "Say Hello"
   deploy-application:
     executor: aws-eks/python3
     parameters:
