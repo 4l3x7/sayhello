@@ -6,7 +6,7 @@ orbs:
   kubernetes: circleci/kubernetes@0.3.0
   
 jobs:
-  lint-and-test:
+  lint:
     docker:
       # Use the same Docker base as the project
       - image: python:3.7.3-stretch
@@ -42,6 +42,20 @@ jobs:
             curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
             apt-get update -y
             apt-get install docker-ce docker-ce-cli containerd.io -y
+      - run:
+          name: Test App
+          command: |
+            docker build -t flask-app . 
+            docker run -d --name flasky flask-app
+            docker exec flasky curl --retry 10 --retry-connrefused http://localhost:5000 | grep "Say Hello"
+  test:
+    docker:
+      # Use the same Docker base as the project
+      - image: circleci/python:3.7.3
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
       - run:
           name: Test App
           command: |
@@ -133,9 +147,12 @@ jobs:
 workflows:
   deploy-pipeline:
     jobs:
-      - lint-and-test
-      #- aws-eks/create-cluster:
-      #    cluster-name: alex-cluster
+      - lint
+      - test:
+       requires: 
+          - lint
+      - aws-eks/create-cluster:
+          cluster-name: alex-cluster
       - aws-ecr/build_and_push_image:
           account-url: AWS_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
@@ -147,7 +164,7 @@ workflows:
           repo: flask-udacity
           tag: "$CIRCLE_SHA1"
           requires: 
-            - lint-and-test
+            - test
       - deploy-application:
           cluster-name: alex-cluster
           aws-region: $AWS_DEFAULT_REGION
@@ -155,7 +172,7 @@ workflows:
           version-info: "${CIRCLE_SHA1}"
           requires:
             - aws-ecr/build_and_push_image
-          #  - aws-eks/create-cluster
+            - aws-eks/create-cluster
       - test-application:
           name: test-application
           cluster-name: alex-cluster
