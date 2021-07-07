@@ -1,5 +1,7 @@
 # SayHello
 
+[![CircleCI](https://circleci.com/gh/4l3x7/sayhello/tree/master.svg?style=svg)](https://circleci.com/gh/4l3x7/sayhello/tree/master)
+
 *Say hello to the world.*
 
 Forked from https://github.com/greyli/sayhello
